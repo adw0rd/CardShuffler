@@ -2,20 +2,25 @@
 #define CONFIG_H
 
 // =============================================================================
-// Display ST7735 (SPI0)
+// Display ST7735 (SPI0) - RP2040-Zero pinout
 // =============================================================================
-#define PIN_DISPLAY_MOSI    19
-#define PIN_DISPLAY_SCK     18
-#define PIN_DISPLAY_CS      17
-#define PIN_DISPLAY_DC      20
-#define PIN_DISPLAY_RST     21
-#define PIN_DISPLAY_BL      22
+#define PIN_DISPLAY_MOSI    7
+#define PIN_DISPLAY_SCK     6
+#define PIN_DISPLAY_CS      5
+#define PIN_DISPLAY_DC      8
+#define PIN_DISPLAY_RST     9
+#define PIN_DISPLAY_BL      10
 
 #define DISPLAY_SPI         spi0
-#define DISPLAY_BAUDRATE    (62500000)  // 62.5 MHz
+#define DISPLAY_BAUDRATE    (20000000)  // 20 MHz (stable for long wires)
 
 #define DISPLAY_WIDTH       128
 #define DISPLAY_HEIGHT      160
+#define DISPLAY_ROTATION    1   // 0=0°, 1=90°, 2=180°, 3=270°
+
+// Green tab display offsets
+#define DISPLAY_OFFSET_X    2
+#define DISPLAY_OFFSET_Y    1
 
 // =============================================================================
 // Rotary Encoder
@@ -23,6 +28,9 @@
 #define PIN_ENC_A           14
 #define PIN_ENC_B           15
 #define PIN_ENC_BTN         16
+
+// Extra button (directly on enclosure)
+#define PIN_EXTRA_BTN       4
 
 #define ENCODER_DEBOUNCE_MS 5
 

@@ -1,0 +1,56 @@
+# SDL Simulator Makefile
+CC = cc
+CFLAGS = -Wall -Wextra -O2 -g
+INCLUDES = -I. -Isrc -Isim
+
+# SDL2 flags
+SDL_CFLAGS := $(shell sdl2-config --cflags 2>/dev/null || echo "-I/opt/homebrew/include/SDL2 -I/usr/local/include/SDL2")
+SDL_LDFLAGS := $(shell sdl2-config --libs 2>/dev/null || echo "-L/opt/homebrew/lib -lSDL2")
+
+CFLAGS += $(SDL_CFLAGS)
+LDFLAGS = $(SDL_LDFLAGS)
+
+# Use sim_pico.h instead of pico/stdlib.h
+CFLAGS += -include sim/sim_pico.h
+
+# Source files
+SIM_SRCS = \
+    sim/sim_main.c \
+    sim/sim_display.c \
+    sim/sim_encoder.c \
+    sim/sim_motor.c
+
+APP_SRCS = \
+    src/display/graphics.c \
+    src/display/icons.c \
+    src/ui/menu.c \
+    src/motor/strategies.c
+
+SRCS = $(SIM_SRCS) $(APP_SRCS)
+OBJS = $(SRCS:%.c=build_sim/%.o)
+
+TARGET = build_sim/card_shuffler_sim
+
+.PHONY: all clean run
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+	@echo "\nSimulator built: $@"
+	@echo "Run with: make sim-run"
+
+build_sim/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+run: $(TARGET)
+	./$(TARGET)
+
+clean:
+	rm -rf build_sim
+
+# Alias
+sim: all
+sim-run: run

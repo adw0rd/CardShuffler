@@ -221,12 +221,14 @@ static void gfx_fill_circle_helper(int16_t x0, int16_t y0, int16_t r, uint8_t co
         f += ddF_x;
 
         if (corners & 0x1) {
-            st7735_fill_rect(x0 - y, y0 - x, 2 * y + delta + 1, 1, color);
-            st7735_fill_rect(x0 - x, y0 - y, 2 * x + delta + 1, 1, color);
+            // Left side: fill from top corner to bottom corner
+            st7735_fill_rect(x0 - x, y0 - y, 1, 2 * y + delta + 1, color);
+            st7735_fill_rect(x0 - y, y0 - x, 1, 2 * x + delta + 1, color);
         }
         if (corners & 0x2) {
-            st7735_fill_rect(x0 - y, y0 + x, 2 * y + delta + 1, 1, color);
-            st7735_fill_rect(x0 - x, y0 + y, 2 * x + delta + 1, 1, color);
+            // Right side: fill from top corner to bottom corner
+            st7735_fill_rect(x0 + x, y0 - y, 1, 2 * y + delta + 1, color);
+            st7735_fill_rect(x0 + y, y0 - x, 1, 2 * x + delta + 1, color);
         }
     }
 }
@@ -308,7 +310,7 @@ void gfx_draw_string(uint16_t x, uint16_t y, const char *str, uint16_t color, ui
 
 void gfx_draw_string_centered(uint16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size) {
     uint16_t len = strlen(str);
-    uint16_t x = (DISPLAY_WIDTH - len * 6 * size) / 2;
+    uint16_t x = (st7735_get_width() - len * 6 * size) / 2;
     gfx_draw_string(x, y, str, color, bg, size);
 }
 

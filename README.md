@@ -1,6 +1,6 @@
 # Card Shuffler
 
-Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/1005009151783502.html), [Oz](https://www.ozon.ru/product/shafl-mashinka-dlya-peremeshivaniya-kart-2946931123/), [Oz](https://www.ozon.ru/product/avtomaticheskiy-peremeshivatel-kart-dlya-pokera-elektronnyy-peremeshivatel-2022-chernyy-3070517864/), [Oz](https://www.ozon.ru/product/ustroystvo-dlya-peremeshivaniya-kart-1807983264/)) powered by RP2040 (Raspberry Pi Pico) with an TFT display (ST7735) and rotary encoder (KY-040) navigation.
+Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/1005009151783502.html), [Oz](https://www.ozon.ru/product/shafl-mashinka-dlya-peremeshivaniya-kart-2946931123/), [Oz](https://www.ozon.ru/product/avtomaticheskiy-peremeshivatel-kart-dlya-pokera-elektronnyy-peremeshivatel-2022-chernyy-3070517864/), [Oz](https://www.ozon.ru/product/ustroystvo-dlya-peremeshivaniya-kart-1807983264/)) powered by RP2040-Zero with TFT display (ST7735), rotary encoder (KY-040), and TB6612FNG motor driver.
 
 <img width="200" height="200" alt="cf" src="https://github.com/user-attachments/assets/eafe9d9e-fd7c-4673-bf4b-0709df51f572" />
 <img width="200" height="200" alt="st7735" src="https://github.com/user-attachments/assets/4f1d5d8a-cf32-44b7-8409-d0241e23001b" />
@@ -24,41 +24,133 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 
 ## Hardware
 
-| Component | Connection |
-|-----------|------------|
-| ST7735 Display | SPI0 (GPIO 17-22) |
-| Rotary Encoder | GPIO 14-16 |
-| Motor 1 | GPIO 2 (PWM) |
-| Motor 2 | GPIO 3 (PWM) |
+| Component | Model | Connection |
+|-----------|-------|------------|
+| Microcontroller | RP2040-Zero | — |
+| Display | ST7735 128x160 | SPI0 (GPIO 5-10) |
+| Encoder | KY-040 | GPIO 14-16 |
+| Motor Driver | TB6612FNG | GPIO 2-3 (PWM) |
 
-### Pinout
+### Pinout (RP2040-Zero)
 
 ```
-Display:        Encoder:        Motors:
-MOSI  → GP19    A   → GP14      M1 → GP2
-SCK   → GP18    B   → GP15      M2 → GP3
-CS    → GP17    BTN → GP16
-DC    → GP20
-RST   → GP21
-BL    → GP22
+                    USB-C
+                   ┌─────┐
+              5V ──┤●   ●├── GND
+             GND ──┤●   ●├── 3V3 ← VCC (display, encoder, TB6612)
+            GP29 ──┤●   ●├── GP0
+            GP28 ──┤●   ●├── GP1
+            GP27 ──┤●   ●├── GP2 → PWMA (Motor 1)
+            GP26 ──┤●   ●├── GP3 → PWMB (Motor 2)
+  Encoder A GP15 ──┤●   ●├── GP4
+  Encoder B GP14 ──┤●   ●├── GP5 → CS
+                   └──┬──┘
+              ┌───────┴───────┐
+             GP11 GP10 GP9  GP8  GP16
+              │    │    │    │    └─→ Encoder BTN
+              │    │    │    └──────→ DC
+              │    │    └───────────→ RST
+              │    └────────────────→ BL
+              │
+             GP6  GP7  GP12 GP13
+              │    └────────────────→ MOSI
+              └─────────────────────→ SCK
+```
+
+### Wiring
+
+| Function | GPIO | Connect to |
+|----------|------|------------|
+| Display SCK | GP6 | SCL |
+| Display MOSI | GP7 | SDA |
+| Display CS | GP5 | CS |
+| Display DC | GP8 | DC |
+| Display RST | GP9 | RES |
+| Display BL | GP10 | BLK |
+| Encoder A | GP14 | CLK |
+| Encoder B | GP15 | DT |
+| Encoder BTN | GP16 | SW |
+| Extra Button | GP4 | Start/Stop |
+| Motor 1 PWM | GP2 | TB6612 PWMA |
+| Motor 2 PWM | GP3 | TB6612 PWMB |
+
+### TB6612FNG Wiring
+
+```
+RP2040-Zero          TB6612FNG              Motors
+───────────          ─────────              ──────
+3V3 ───────────────→ VCC
+GND ───────────────→ GND ←───────────────── GND (power supply)
+                     VM ←────────────────── +5-12V (power supply)
+GP2 ───────────────→ PWMA
+3V3 ───────────────→ AIN1                   AOUT1 ──→ Motor 1
+GND ───────────────→ AIN2                   AOUT2 ──→ Motor 1
+GP3 ───────────────→ PWMB
+3V3 ───────────────→ BIN1                   BOUT1 ──→ Motor 2
+GND ───────────────→ BIN2                   BOUT2 ──→ Motor 2
+3V3 ───────────────→ STBY
 ```
 
 ## Building
 
-Requires [Pico SDK](https://github.com/raspberrypi/pico-sdk). The SDK will be fetched automatically during build.
+Requires [Pico SDK](https://github.com/raspberrypi/pico-sdk) and cmake. The SDK will be fetched automatically during build.
 
 ```bash
-mkdir build && cd build
-cmake ..
-make -j4
+brew install cmake    # macOS
+```
+
+### Make Commands
+
+| Command | Description |
+|---------|-------------|
+| `make` | Build firmware (.uf2) |
+| `make clean` | Clean firmware build |
+| `make flash` | Build and flash to device |
+| `make sim` | Build SDL simulator |
+| `make sim-run` | Run simulator |
+| `make sim-clean` | Clean simulator build |
+| `make help` | Show all commands |
+
+## Simulator
+
+SDL-based simulator for fast UI iteration without flashing hardware.
+
+```bash
+brew install sdl2     # install SDL2
+
+make sim              # build simulator
+make sim-run          # run simulator
+make sim-clean        # clean simulator build
+```
+
+### Simulator Controls
+
+| Key | Action |
+|-----|--------|
+| ←/↑ | Previous item (CCW) |
+| →/↓ | Next item (CW) |
+| Enter/Space | Select / Start |
+| ESC | Quit |
+
+### Simulator Structure
+
+```
+sim/
+├── sim_main.c      # Main loop with SDL events
+├── sim_display.c   # ST7735 emulation via SDL (3x scale)
+├── sim_encoder.c   # Keyboard → encoder events
+├── sim_motor.c     # Motor stubs (printf output)
+├── sim_pico.h      # Pico SDK stubs
+└── pico/stdlib.h   # Fake header for compatibility
 ```
 
 ## Flashing
 
-1. Hold **BOOTSEL** button on Pico
-2. Connect USB cable
-3. Copy `build/card_shuffler.uf2` to the mounted `RPI-RP2` drive
-4. Pico will reboot and run the firmware
+**RP2040-Zero:**
+1. Hold **BOOT** button
+2. Connect USB-C cable (or tap **RESET** while holding **BOOT**)
+3. Run `make flash` or copy `build/card_shuffler.uf2` to `RPI-RP2` drive
+4. Device will reboot and run the firmware
 
 ## Usage
 

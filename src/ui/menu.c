@@ -5,15 +5,13 @@
 #include "display/icons.h"
 #include <string.h>
 
-#define TITLE_HEIGHT    20
-#define GRID_MARGIN_X   8
-#define GRID_MARGIN_Y   28
+#define GRID_MARGIN_X   26  // (160 - 3*36) / 2 = 26
+#define GRID_MARGIN_Y   10  // (128 - 2*44 - 20) / 2 = 10
 #define CELL_WIDTH      36
 #define CELL_HEIGHT     44
-#define ICON_OFFSET_X   6
+#define ICON_OFFSET_X   4
 #define ICON_OFFSET_Y   4
 #define NAME_HEIGHT     20
-#define STATUS_HEIGHT   12
 
 static const menu_item_t menu_items[STRATEGY_COUNT] = {
     {"Quick",  ICON_SPADE,   COLOR_CARD_BLACK},
@@ -55,10 +53,12 @@ static void draw_item(uint8_t index, bool highlighted) {
 }
 
 static void draw_name_bar(void) {
-    uint16_t y = DISPLAY_HEIGHT - NAME_HEIGHT - STATUS_HEIGHT;
+    uint16_t h = st7735_get_height();
+    uint16_t w = st7735_get_width();
+    uint16_t y = h - NAME_HEIGHT;
 
     // Clear name area
-    st7735_fill_rect(0, y, DISPLAY_WIDTH, NAME_HEIGHT, COLOR_MENU_BG);
+    st7735_fill_rect(0, y, w, NAME_HEIGHT, COLOR_MENU_BG);
 
     // Draw strategy name centered
     const char *name = menu_items[selected_index].name;
@@ -74,9 +74,6 @@ void menu_draw(void) {
     // Fill background
     st7735_fill_screen(COLOR_MENU_BG);
 
-    // Title
-    menu_draw_title("CARD SHUFFLER");
-
     // Draw all items
     for (uint8_t i = 0; i < STRATEGY_COUNT; i++) {
         draw_item(i, i == selected_index);
@@ -84,11 +81,6 @@ void menu_draw(void) {
 
     // Strategy name
     draw_name_bar();
-
-    // Status bar
-    uint16_t status_y = DISPLAY_HEIGHT - STATUS_HEIGHT;
-    st7735_fill_rect(0, status_y, DISPLAY_WIDTH, STATUS_HEIGHT, COLOR_DARK_GRAY);
-    gfx_draw_string_centered(status_y + 2, "Press to start", COLOR_LIGHT_GRAY, COLOR_DARK_GRAY, 1);
 }
 
 void menu_next(void) {
@@ -119,28 +111,23 @@ strategy_id_t menu_get_selected(void) {
 
 void menu_set_shuffling(bool active) {
     is_shuffling = active;
-
-    uint16_t status_y = DISPLAY_HEIGHT - STATUS_HEIGHT;
-    st7735_fill_rect(0, status_y, DISPLAY_WIDTH, STATUS_HEIGHT, COLOR_DARK_GRAY);
-
-    if (active) {
-        gfx_draw_string_centered(status_y + 2, "Shuffling...", COLOR_YELLOW, COLOR_DARK_GRAY, 1);
-    } else {
-        gfx_draw_string_centered(status_y + 2, "Press to start", COLOR_LIGHT_GRAY, COLOR_DARK_GRAY, 1);
-    }
+    draw_name_bar();
 }
 
 void menu_draw_progress(uint8_t percent) {
     if (percent > 100) percent = 100;
 
-    uint16_t bar_y = DISPLAY_HEIGHT - STATUS_HEIGHT;
-    uint16_t bar_width = (DISPLAY_WIDTH * percent) / 100;
+    uint16_t h = st7735_get_height();
+    uint16_t w = st7735_get_width();
+    uint16_t bar_y = h - 2;  // Progress bar at bottom
+    uint16_t bar_width = (w * percent) / 100;
 
     st7735_fill_rect(0, bar_y, bar_width, 2, COLOR_GREEN);
-    st7735_fill_rect(bar_width, bar_y, DISPLAY_WIDTH - bar_width, 2, COLOR_DARK_GRAY);
+    st7735_fill_rect(bar_width, bar_y, w - bar_width, 2, COLOR_DARK_GRAY);
 }
 
 void menu_draw_title(const char *title) {
-    st7735_fill_rect(0, 0, DISPLAY_WIDTH, TITLE_HEIGHT, COLOR_DARK_GRAY);
+    uint16_t w = st7735_get_width();
+    st7735_fill_rect(0, 0, w, 20, COLOR_DARK_GRAY);
     gfx_draw_string_centered(6, title, COLOR_WHITE, COLOR_DARK_GRAY, 1);
 }

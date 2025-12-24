@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 void st7735_init(void);
 void st7735_set_rotation(uint8_t rotation);
@@ -13,5 +14,9 @@ void st7735_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c
 void st7735_write_data(const uint8_t *data, size_t len);
 void st7735_write_data16(const uint16_t *data, size_t len);
 void st7735_backlight(bool on);
+
+// Get actual display dimensions (after rotation)
+uint16_t st7735_get_width(void);
+uint16_t st7735_get_height(void);
 
 #endif // ST7735_H

@@ -23,9 +23,8 @@ static const int8_t encoder_table[] = {
     0, -1,  1,  0
 };
 
-static void encoder_callback(uint gpio, uint32_t events) {
-    (void)events;
-
+static void gpio_callback(uint gpio, uint32_t events) {
+    // Handle encoder rotation
     if (gpio == PIN_ENC_A || gpio == PIN_ENC_B) {
         uint8_t a = gpio_get(PIN_ENC_A);
         uint8_t b = gpio_get(PIN_ENC_B);
@@ -34,31 +33,31 @@ static void encoder_callback(uint gpio, uint32_t events) {
         int8_t delta = encoder_table[(last_state << 2) | current_state];
         encoder_delta += delta;
         last_state = current_state;
-    }
-}
-
-static void button_callback(uint gpio, uint32_t events) {
-    (void)gpio;
-
-    static uint32_t last_interrupt_time = 0;
-    uint32_t now = to_ms_since_boot(get_absolute_time());
-
-    // Debounce
-    if (now - last_interrupt_time < ENCODER_DEBOUNCE_MS) {
         return;
     }
-    last_interrupt_time = now;
 
-    if (events & GPIO_IRQ_EDGE_FALL) {
-        button_pressed = true;
-        button_event = true;
-        button_press_time = now;
-        long_press_fired = false;
-    }
-    if (events & GPIO_IRQ_EDGE_RISE) {
-        button_pressed = false;
-        if (!long_press_fired) {
+    // Handle buttons (encoder button + extra button)
+    if (gpio == PIN_ENC_BTN || gpio == PIN_EXTRA_BTN) {
+        static uint32_t last_interrupt_time = 0;
+        uint32_t now = to_ms_since_boot(get_absolute_time());
+
+        // Debounce
+        if (now - last_interrupt_time < ENCODER_DEBOUNCE_MS) {
+            return;
+        }
+        last_interrupt_time = now;
+
+        if (events & GPIO_IRQ_EDGE_FALL) {
+            button_pressed = true;
             button_event = true;
+            button_press_time = now;
+            long_press_fired = false;
+        }
+        if (events & GPIO_IRQ_EDGE_RISE) {
+            button_pressed = false;
+            if (!long_press_fired) {
+                button_event = true;
+            }
         }
     }
 }
@@ -72,20 +71,23 @@ void encoder_init(void) {
     gpio_pull_up(PIN_ENC_A);
     gpio_pull_up(PIN_ENC_B);
 
-    // Initialize button pin
+    // Initialize button pins
     gpio_init(PIN_ENC_BTN);
     gpio_set_dir(PIN_ENC_BTN, GPIO_IN);
     gpio_pull_up(PIN_ENC_BTN);
 
+    gpio_init(PIN_EXTRA_BTN);
+    gpio_set_dir(PIN_EXTRA_BTN, GPIO_IN);
+    gpio_pull_up(PIN_EXTRA_BTN);
+
     // Read initial state
     last_state = (gpio_get(PIN_ENC_A) << 1) | gpio_get(PIN_ENC_B);
 
-    // Set up interrupts for encoder
-    gpio_set_irq_enabled_with_callback(PIN_ENC_A, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &encoder_callback);
+    // Set up interrupts (single callback for all GPIOs)
+    gpio_set_irq_enabled_with_callback(PIN_ENC_A, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
     gpio_set_irq_enabled(PIN_ENC_B, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true);
-
-    // Set up interrupts for button
-    gpio_set_irq_enabled_with_callback(PIN_ENC_BTN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &button_callback);
+    gpio_set_irq_enabled(PIN_ENC_BTN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true);
+    gpio_set_irq_enabled(PIN_EXTRA_BTN, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true);
 }
 
 encoder_event_t encoder_poll(void) {

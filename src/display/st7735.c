@@ -42,6 +42,8 @@
 
 static uint16_t display_width = DISPLAY_WIDTH;
 static uint16_t display_height = DISPLAY_HEIGHT;
+static uint8_t col_offset = DISPLAY_OFFSET_X;
+static uint8_t row_offset = DISPLAY_OFFSET_Y;
 
 static inline void cs_select(void) {
     gpio_put(PIN_DISPLAY_CS, 0);
@@ -185,21 +187,29 @@ void st7735_set_rotation(uint8_t rotation) {
             madctl = MADCTL_MX | MADCTL_MY | MADCTL_RGB;
             display_width = DISPLAY_WIDTH;
             display_height = DISPLAY_HEIGHT;
+            col_offset = DISPLAY_OFFSET_X;
+            row_offset = DISPLAY_OFFSET_Y;
             break;
         case 1:
             madctl = MADCTL_MY | MADCTL_MV | MADCTL_RGB;
             display_width = DISPLAY_HEIGHT;
             display_height = DISPLAY_WIDTH;
+            col_offset = 1;
+            row_offset = 2;
             break;
         case 2:
             madctl = MADCTL_RGB;
             display_width = DISPLAY_WIDTH;
             display_height = DISPLAY_HEIGHT;
+            col_offset = DISPLAY_OFFSET_X;
+            row_offset = DISPLAY_OFFSET_Y;
             break;
         case 3:
             madctl = MADCTL_MX | MADCTL_MV | MADCTL_RGB;
             display_width = DISPLAY_HEIGHT;
             display_height = DISPLAY_WIDTH;
+            col_offset = DISPLAY_OFFSET_Y;
+            row_offset = DISPLAY_OFFSET_X;
             break;
     }
 
@@ -208,6 +218,11 @@ void st7735_set_rotation(uint8_t rotation) {
 }
 
 void st7735_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+    x0 += col_offset;
+    x1 += col_offset;
+    y0 += row_offset;
+    y1 += row_offset;
+
     write_cmd(ST7735_CASET);
     write_data((uint8_t[]){0x00, x0, 0x00, x1}, 4);
 
@@ -280,4 +295,12 @@ void st7735_write_data16(const uint16_t *data, size_t len) {
 
 void st7735_backlight(bool on) {
     gpio_put(PIN_DISPLAY_BL, on ? 1 : 0);
+}
+
+uint16_t st7735_get_width(void) {
+    return display_width;
+}
+
+uint16_t st7735_get_height(void) {
+    return display_height;
 }

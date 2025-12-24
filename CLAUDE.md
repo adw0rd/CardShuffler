@@ -4,22 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Card Shuffler firmware for RP2040 (Raspberry Pi Pico) with ST7735 display, rotary encoder navigation, and dual PWM motor control.
+Card Shuffler firmware for RP2040-Zero with ST7735 display, rotary encoder navigation, TB6612FNG motor driver, and dual PWM motor control.
 
 ## Build Commands
 
 ```bash
-# Create build directory and configure
-mkdir build && cd build
-cmake ..
-
-# Build firmware
-make -j4
-
-# Output: build/card_shuffler.uf2
+make          # build firmware
+make clean    # clean build
+make flash    # build and flash (if RPI-RP2 mounted)
 ```
 
-Flash by holding BOOTSEL on Pico while connecting USB, then copy `card_shuffler.uf2` to the mounted drive.
+Flash by holding BOOT on RP2040-Zero while connecting USB (or tap RESET while holding BOOT).
 
 ## Architecture
 
@@ -40,21 +35,22 @@ src/
     └── strategies.c/h  # Shuffle algorithms (quick, riffle, strip, wash, box, custom)
 ```
 
-## Pin Configuration (config.h)
+## Pin Configuration (config.h) - RP2040-Zero
 
 | Function | GPIO |
 |----------|------|
-| Display MOSI | 19 |
-| Display SCK | 18 |
-| Display CS | 17 |
-| Display DC | 20 |
-| Display RST | 21 |
-| Display BL | 22 |
+| Display MOSI | 7 |
+| Display SCK | 6 |
+| Display CS | 5 |
+| Display DC | 8 |
+| Display RST | 9 |
+| Display BL | 10 |
 | Encoder A | 14 |
 | Encoder B | 15 |
 | Encoder BTN | 16 |
-| Motor 1 | 2 |
-| Motor 2 | 3 |
+| Extra Button | 4 |
+| Motor 1 (PWMA) | 2 |
+| Motor 2 (PWMB) | 3 |
 
 ## Key Patterns
 
