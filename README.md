@@ -22,6 +22,10 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 - **PWM Motor Control** with soft start/stop ramping
 - **Progress Bar** during shuffling
 
+![ch1](https://github.com/user-attachments/assets/8b674ad7-5cb8-4240-98c8-4e7bd5a6969b)
+
+
+
 ## Hardware
 
 | Component | Model | Connection |
