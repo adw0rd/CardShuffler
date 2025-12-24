@@ -1,6 +1,9 @@
 #include "strategies.h"
 #include "motor.h"
 #include "config.h"
+#include "ui/menu.h"
+#include "display/st7735.h"
+#include "input/encoder.h"
 #include "pico/stdlib.h"
 #include <stdlib.h>
 
@@ -8,15 +11,28 @@ static bool running = false;
 static uint32_t start_time = 0;
 static uint32_t total_duration = 0;
 static strategy_id_t current_strategy = STRATEGY_QUICK;
+static uint32_t stop_time = 0;  // When strategy was stopped
 
-static custom_params_t custom_params = {
-    .motor1_speed = 80,
-    .motor2_speed = 80,
-    .duration_ms = 5000,
-    .pulse_on_ms = 500,
-    .pulse_off_ms = 200,
-    .alternating = true
-};
+// Sleep with display update and button check
+static void strategy_sleep_ms(uint32_t ms) {
+    uint32_t step = 50;  // Check every 50ms
+    while (ms > 0 && running) {
+        uint32_t delay = (ms > step) ? step : ms;
+        sleep_ms(delay);
+        ms -= delay;
+
+        // Check for stop button
+        encoder_event_t event = encoder_poll();
+        if (event == ENC_EVENT_PRESS || event == ENC_EVENT_RELEASE) {
+            running = false;
+            break;
+        }
+
+        // Update display
+        menu_draw_shuffling(strategy_get_progress(), strategy_get_remaining_sec());
+        st7735_flush();
+    }
+}
 
 // Strategy: Quick - Both motors full speed
 static void run_quick(void) {
@@ -26,7 +42,7 @@ static void run_quick(void) {
     while (running) {
         uint32_t elapsed = to_ms_since_boot(get_absolute_time()) - start_time;
         if (elapsed >= total_duration) break;
-        sleep_ms(50);
+        strategy_sleep_ms(50);
     }
 
     motor_ramp_both(0, 0, MOTOR_RAMP_MS);
@@ -44,17 +60,17 @@ static void run_riffle(void) {
 
         // Motor 1 pulse
         motor_set_speed(MOTOR_1, 100);
-        sleep_ms(pulse_ms);
+        strategy_sleep_ms(pulse_ms);
         motor_set_speed(MOTOR_1, 0);
-        sleep_ms(gap_ms);
+        strategy_sleep_ms(gap_ms);
 
         if (!running) break;
 
         // Motor 2 pulse
         motor_set_speed(MOTOR_2, 100);
-        sleep_ms(pulse_ms);
+        strategy_sleep_ms(pulse_ms);
         motor_set_speed(MOTOR_2, 0);
-        sleep_ms(gap_ms);
+        strategy_sleep_ms(gap_ms);
     }
 
     motor_stop_all();
@@ -74,9 +90,9 @@ static void run_strip(void) {
 
         // Quick burst from motor 1
         motor_set_speed(MOTOR_1, 100);
-        sleep_ms(burst_ms);
+        strategy_sleep_ms(burst_ms);
         motor_set_speed(MOTOR_1, 30);
-        sleep_ms(gap_ms);
+        strategy_sleep_ms(gap_ms);
     }
 
     motor_ramp_both(0, 0, MOTOR_RAMP_MS);
@@ -96,7 +112,7 @@ static void run_wash(void) {
         uint16_t hold_ms = 100 + (rand() % 300);
 
         motor_set_speed_both(speed1, speed2);
-        sleep_ms(hold_ms);
+        strategy_sleep_ms(hold_ms);
     }
 
     motor_ramp_both(0, 0, MOTOR_RAMP_MS);
@@ -113,73 +129,51 @@ static void run_box(void) {
 
         // Phase 1: Motor 1 fast, Motor 2 slow
         motor_ramp_both(90, 30, 100);
-        sleep_ms(phase_ms);
+        strategy_sleep_ms(phase_ms);
         if (!running) break;
 
         // Phase 2: Both medium
         motor_ramp_both(60, 60, 100);
-        sleep_ms(phase_ms / 2);
+        strategy_sleep_ms(phase_ms / 2);
         if (!running) break;
 
         // Phase 3: Motor 1 slow, Motor 2 fast
         motor_ramp_both(30, 90, 100);
-        sleep_ms(phase_ms);
+        strategy_sleep_ms(phase_ms);
         if (!running) break;
 
         // Phase 4: Both medium
         motor_ramp_both(60, 60, 100);
-        sleep_ms(phase_ms / 2);
+        strategy_sleep_ms(phase_ms / 2);
     }
 
     motor_ramp_both(0, 0, MOTOR_RAMP_MS);
 }
 
-// Strategy: Custom - User-defined parameters
-static void run_custom(void) {
-    total_duration = custom_params.duration_ms;
+// Strategy: Random - randomly pick another strategy
+static void run_random(void) {
+    // Pick random strategy (0-4, excluding STRATEGY_RANDOM itself)
+    strategy_id_t pick = (strategy_id_t)(rand() % 5);
 
-    if (custom_params.alternating) {
-        while (running) {
-            uint32_t elapsed = to_ms_since_boot(get_absolute_time()) - start_time;
-            if (elapsed >= total_duration) break;
-
-            motor_set_speed(MOTOR_1, custom_params.motor1_speed);
-            motor_set_speed(MOTOR_2, 0);
-            sleep_ms(custom_params.pulse_on_ms);
-
-            if (!running) break;
-
-            motor_set_speed(MOTOR_1, 0);
-            sleep_ms(custom_params.pulse_off_ms);
-
-            if (!running) break;
-
-            motor_set_speed(MOTOR_2, custom_params.motor2_speed);
-            sleep_ms(custom_params.pulse_on_ms);
-
-            if (!running) break;
-
-            motor_set_speed(MOTOR_2, 0);
-            sleep_ms(custom_params.pulse_off_ms);
-        }
-    } else {
-        motor_ramp_both(custom_params.motor1_speed, custom_params.motor2_speed, MOTOR_RAMP_MS);
-
-        while (running) {
-            uint32_t elapsed = to_ms_since_boot(get_absolute_time()) - start_time;
-            if (elapsed >= total_duration) break;
-            sleep_ms(50);
-        }
+    switch (pick) {
+        case STRATEGY_QUICK:  run_quick();  break;
+        case STRATEGY_RIFFLE: run_riffle(); break;
+        case STRATEGY_STRIP:  run_strip();  break;
+        case STRATEGY_WASH:   run_wash();   break;
+        case STRATEGY_BOX:    run_box();    break;
+        default:              run_quick();  break;
     }
-
-    motor_ramp_both(0, 0, MOTOR_RAMP_MS);
 }
 
 void strategy_run(strategy_id_t strategy) {
     if (running) return;
 
+    // Prevent immediate restart after stop (debounce 500ms)
+    uint32_t now = to_ms_since_boot(get_absolute_time());
+    if (stop_time > 0 && (now - stop_time) < 500) return;
+
     running = true;
-    start_time = to_ms_since_boot(get_absolute_time());
+    start_time = now;
     current_strategy = strategy;
 
     switch (strategy) {
@@ -198,8 +192,8 @@ void strategy_run(strategy_id_t strategy) {
         case STRATEGY_BOX:
             run_box();
             break;
-        case STRATEGY_CUSTOM:
-            run_custom();
+        case STRATEGY_RANDOM:
+            run_random();
             break;
         default:
             run_quick();
@@ -207,11 +201,13 @@ void strategy_run(strategy_id_t strategy) {
     }
 
     running = false;
+    stop_time = to_ms_since_boot(get_absolute_time());
     motor_stop_all();
 }
 
 void strategy_stop(void) {
     running = false;
+    stop_time = to_ms_since_boot(get_absolute_time());
     motor_stop_all();
 }
 
@@ -228,10 +224,11 @@ uint8_t strategy_get_progress(void) {
     return (uint8_t)((elapsed * 100) / total_duration);
 }
 
-void strategy_set_custom(const custom_params_t *params) {
-    custom_params = *params;
-}
+uint16_t strategy_get_remaining_sec(void) {
+    if (!running || total_duration == 0) return 0;
 
-custom_params_t* strategy_get_custom(void) {
-    return &custom_params;
+    uint32_t elapsed = to_ms_since_boot(get_absolute_time()) - start_time;
+    if (elapsed >= total_duration) return 0;
+
+    return (uint16_t)((total_duration - elapsed) / 1000);
 }

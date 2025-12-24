@@ -161,3 +161,8 @@ void sim_display_cleanup(void) {
     if (window) SDL_DestroyWindow(window);
     SDL_Quit();
 }
+
+// Called from strategy_sleep_ms to force display update
+void st7735_flush(void) {
+    sim_display_update();
+}

@@ -11,7 +11,7 @@ typedef enum {
     STRATEGY_STRIP,
     STRATEGY_WASH,
     STRATEGY_BOX,
-    STRATEGY_CUSTOM,
+    STRATEGY_RANDOM,
     STRATEGY_COUNT
 } strategy_id_t;
 
@@ -29,5 +29,6 @@ strategy_id_t menu_get_selected(void);
 void menu_set_shuffling(bool active);
 void menu_draw_progress(uint8_t percent);
 void menu_draw_title(const char *title);
+void menu_draw_shuffling(uint8_t percent, uint16_t remaining_sec);
 
 #endif // MENU_H

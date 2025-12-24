@@ -19,4 +19,7 @@ void st7735_backlight(bool on);
 uint16_t st7735_get_width(void);
 uint16_t st7735_get_height(void);
 
+// Flush display buffer (for simulator, no-op on hardware)
+void st7735_flush(void);
+
 #endif // ST7735_H

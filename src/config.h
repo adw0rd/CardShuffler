@@ -25,12 +25,12 @@
 // =============================================================================
 // Rotary Encoder
 // =============================================================================
-#define PIN_ENC_A           14
-#define PIN_ENC_B           15
-#define PIN_ENC_BTN         16
+#define PIN_ENC_A           15
+#define PIN_ENC_B           14
+#define PIN_ENC_BTN         4
 
-// Extra button (directly on enclosure)
-#define PIN_EXTRA_BTN       4
+// Extra button (optional, on bottom pads)
+#define PIN_EXTRA_BTN       16
 
 #define ENCODER_DEBOUNCE_MS 5
 

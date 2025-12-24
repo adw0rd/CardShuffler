@@ -13,6 +13,7 @@ typedef enum {
     ICON_CLUB,
     ICON_CARDS,
     ICON_GEAR,
+    ICON_DICE,
     ICON_COUNT
 } icon_id_t;
 
@@ -22,6 +23,7 @@ extern const uint8_t icon_diamond[];
 extern const uint8_t icon_club[];
 extern const uint8_t icon_cards[];
 extern const uint8_t icon_gear[];
+extern const uint8_t icon_dice[];
 
 const uint8_t* icon_get(icon_id_t id);
 

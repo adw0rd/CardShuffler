@@ -33,7 +33,8 @@ static void handle_menu_input(encoder_event_t event) {
             strategy_run(menu_get_selected());
             state = STATE_MENU;
             menu_set_shuffling(false);
-            menu_draw_progress(0);
+            menu_draw();  // Redraw menu to clear spinner
+            st7735_flush();
             break;
 
         default:
@@ -74,14 +75,14 @@ int main(void) {
 
             case STATE_SHUFFLING:
                 handle_shuffling_input(event);
-                // Update progress bar
-                menu_draw_progress(strategy_get_progress());
+                // Update spinner and countdown
+                menu_draw_shuffling(strategy_get_progress(), strategy_get_remaining_sec());
 
                 // Check if done
                 if (!strategy_is_running()) {
                     state = STATE_MENU;
                     menu_set_shuffling(false);
-                    menu_draw_progress(0);
+                    menu_draw();  // Redraw menu to clear spinner
                 }
                 break;
 
@@ -90,7 +91,7 @@ int main(void) {
                 if (!motor_is_running()) {
                     state = STATE_MENU;
                     menu_set_shuffling(false);
-                    menu_draw_progress(0);
+                    menu_draw();  // Redraw menu to clear spinner
                 }
                 break;
         }

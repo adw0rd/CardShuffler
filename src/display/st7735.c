@@ -304,3 +304,7 @@ uint16_t st7735_get_width(void) {
 uint16_t st7735_get_height(void) {
     return display_height;
 }
+
+void st7735_flush(void) {
+    // No-op on hardware - display updates immediately via SPI
+}
