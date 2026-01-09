@@ -3,7 +3,7 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 
-#define LONG_PRESS_MS 1000
+#define LONG_PRESS_MS 3000
 
 static volatile int8_t encoder_delta = 0;
 static volatile bool button_pressed = false;

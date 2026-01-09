@@ -10,7 +10,7 @@ typedef enum {
     ENC_EVENT_CCW,      // Counter-clockwise rotation
     ENC_EVENT_PRESS,    // Button pressed
     ENC_EVENT_RELEASE,  // Button released
-    ENC_EVENT_LONG_PRESS // Long press (>1s)
+    ENC_EVENT_LONG_PRESS // Long press (>3s)
 } encoder_event_t;
 
 void encoder_init(void);
