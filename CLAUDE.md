@@ -52,6 +52,13 @@ src/
 | Motor 1 (PWMA) | 2 |
 | Motor 2 (PWMB) | 3 |
 
+## Motors
+
+2x FA-130 DC motors (∅20mm), nominal 1.5–3V, max ~4.5V. Driven via TB6612FNG with VM=5V.
+`MOTOR_MAX_SPEED` in `config.h` limits PWM duty cycle to 65% (~3.25V effective) to protect the motors.
+
+![Motor photo](docs/motor-fa130.jpg)
+
 ## Key Patterns
 
 - Colors are RGB565 format (16-bit)
