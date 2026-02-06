@@ -2,8 +2,8 @@
 
 Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/1005009151783502.html), [Oz](https://www.ozon.ru/product/shafl-mashinka-dlya-peremeshivaniya-kart-2946931123/), [Oz](https://www.ozon.ru/product/avtomaticheskiy-peremeshivatel-kart-dlya-pokera-elektronnyy-peremeshivatel-2022-chernyy-3070517864/), [Oz](https://www.ozon.ru/product/ustroystvo-dlya-peremeshivaniya-kart-1807983264/)) powered by RP2040-Zero with TFT display (ST7735), rotary encoder (KY-040), and TB6612FNG motor driver.
 
-<img width="200" height="200" alt="cf" src="docs/card-shuffler.png" /> <img width="200" height="200" alt="st7735" src="docs/st7735.png" /> <img width="200" height="200" alt="rp2040" src="docs/rp2040-zero.jpg" />
-<img width="200" height="200" alt="ky040" src="docs/ky040.png" /> <img width="200" height="200" alt="tb6612fng" src="docs/tb6612fng.jpg" /> <img width="200" height="200" alt="fa130" src="docs/motor-fa130.jpg" /> <img width="200" height="200" alt="lx-lcbst" src="docs/lx-lcbst.jpg" /> <img width="200" height="200" alt="lipo" src="docs/lipo.jpg" />
+<img width="200" height="200" alt="cf" src="docs/card-shuffler.png" /> <img width="200" height="200" alt="st7735" src="docs/st7735.png" /> <img width="200" height="200" alt="rp2040" src="docs/rp2040-zero.jpg" /> <img width="200" height="200" alt="ky040" src="docs/ky040.png" />
+<img width="200" height="200" alt="tb6612fng" src="docs/tb6612fng.jpg" /> <img width="200" height="200" alt="fa130" src="docs/motor-fa130.jpg" /> <img width="200" height="200" alt="lx-lcbst" src="docs/lx-lcbst.jpg" /> <img width="200" height="200" alt="lipo" src="docs/lipo.jpg" />
 
 ## Features
 
@@ -13,7 +13,7 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
   - **Strip** — Short bursts from one motor while other runs slow
   - **Wash** — Random chaotic mixing pattern
   - **Box** — Systematic alternating speed phases
-  - **Custom** — User-configurable parameters
+  - **Random** — Randomly picks another strategy
 
 - **Visual Menu** with card suit icons (♠♥♦♣)
 - **Rotary Encoder** navigation with button to start/stop
@@ -30,7 +30,7 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 |-----------|-------|------------|
 | Microcontroller | RP2040-Zero | — |
 | Display | ST7735 128x160 | SPI0 (GPIO 5-10) |
-| Encoder | KY-040 | GPIO 14-16 |
+| Encoder | KY-040 | GPIO 4, 14-15 |
 | Motor Driver | TB6612FNG | GPIO 2-3 (PWM) |
 | Motors | 2x FA-130 (∅20mm, 1.5–3V) | TB6612FNG AO1/AO2, BO1/BO2 |
 | Boost Converter | LX-LCBST (3.7V → 5V) | 5V to RP2040 VBUS, TB6612FNG VCC+VM |
@@ -47,12 +47,12 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
             GP28 ──┤●   ●├── GP1
             GP27 ──┤●   ●├── GP2 → PWMA (Motor 1)
             GP26 ──┤●   ●├── GP3 → PWMB (Motor 2)
-  Encoder A GP15 ──┤●   ●├── GP4
+  Encoder A GP15 ──┤●   ●├── GP4 → Encoder BTN
   Encoder B GP14 ──┤●   ●├── GP5 → CS
                    └──┬──┘
               ┌───────┴───────┐
              GP11 GP10 GP9  GP8  GP16
-              │    │    │    │    └─→ Encoder BTN
+              │    │    │    │    └─→ Extra BTN
               │    │    │    └──────→ DC
               │    │    └───────────→ RST
               │    └────────────────→ BL
@@ -72,10 +72,10 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 | Display DC | GP8 | DC |
 | Display RST | GP9 | RES |
 | Display BL | GP10 | BLK |
-| Encoder A | GP14 | CLK |
-| Encoder B | GP15 | DT |
-| Encoder BTN | GP16 | SW |
-| Extra Button | GP4 | Start/Stop |
+| Encoder A | GP15 | CLK |
+| Encoder B | GP14 | DT |
+| Encoder BTN | GP4 | SW |
+| Extra Button | GP16 | Start/Stop |
 | Motor 1 PWM | GP2 | TB6612 PWMA |
 | Motor 2 PWM | GP3 | TB6612 PWMB |
 
@@ -84,9 +84,9 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 ```
 RP2040-Zero          TB6612FNG              Motors
 ───────────          ─────────              ──────
-3V3 ───────────────→ VCC
-GND ───────────────→ GND ←───────────────── GND (power supply)
-                     VM ←────────────────── +5-12V (power supply)
+LX-LCBST 5V ──────→ VCC
+LX-LCBST 5V ──────→ VM
+LX-LCBST GND ─────→ GND
 GP2 ───────────────→ PWMA
 3V3 ───────────────→ AIN1                   AOUT1 ──→ Motor 1
 GND ───────────────→ AIN2                   AOUT2 ──→ Motor 1
