@@ -16,57 +16,65 @@
                               │  VIN- ◄── B-    VOUT- ──►  GND
                               └──────────────┬──────────────┘
                                              │
-                         ┌───────────────────┼───────────────────┐
-                         │                   │                   │
-                        5V                  5V                  5V
-                         │                   │                   │
-          ┌──────────────┴──────┐    ┌───────┴───────┐    ┌──────┴──────┐
-          │    RP2040-Zero      │    │   TB6612FNG   │    │   ST7735    │
-          │                     │    │               │    │   Display   │
-          │ 5V ──────────► VBUS │    │ VCC ◄── 5V    │    │             │
-          │ GND ─────────► GND  │    │ VM  ◄── 5V    │    │ VCC ◄── 3V3 │
-          │                     │    │ GND ◄── GND   │    │ GND ◄── GND │
-          │                     │    │               │    │             │
-          │ GPIO 2 ──────────────────► PWMA          │    │             │
-          │ GPIO 3 ──────────────────► PWMB          │    │             │
-          │                     │    │               │    │             │
-          │ 3V3 ─────────────────────► STBY (5V OK)  │    │             │
-          │ 3V3 ─────────────────────► AIN1, BIN1    │    │             │
-          │ GND ─────────────────────► AIN2, BIN2    │    │             │
-          │                     │    │               │    │             │
-          │ GPIO 6 (SCK) ────────────────────────────────► SCL (SCK)   │
-          │ GPIO 7 (MOSI) ───────────────────────────────► SDA         │
-          │ GPIO 5 ──────────────────────────────────────► CS          │
-          │ GPIO 8 ──────────────────────────────────────► DC          │
-          │ GPIO 9 ──────────────────────────────────────► RES (RST)   │
-          │ GPIO 10 ─────────────────────────────────────► BL          │
-          │                     │    │               │    │             │
-          └─────────┬───────────┘    │  AO1 ──► M1+ │    └─────────────┘
-                    │                │  AO2 ──► M1- │
-                    │                │  BO1 ──► M2+ │
-                    │                │  BO2 ──► M2- │
-                    │                └───────┬───────┘
-                    │                        │
-                    │                ┌───────┴───────┐
-                    │                │    MOTORS     │
-                    │                │ ┌───┐  ┌───┐  │
-                    │                │ │ M1│  │ M2│  │
-                    │                │ └───┘  └───┘  │
-                    │                └───────────────┘
-                    │
-     ┌──────────────┴──────────────┐
-     │                             │
-     │  ┌─────────────────────┐    │  ┌─────────────┐
-     │  │   Rotary Encoder    │    │  │ Extra BTN   │
-     │  │                     │    │  │             │
-     │  │  A ────► GPIO 15    │    │  │ S ─► GPIO 16│
-     │  │  B ────► GPIO 14    │    │  │ - ─► GND    │
-     │  │  SW ───► GPIO 4     │    │  └─────────────┘
-     │  │  + ────► 3V3        │    │
-     │  │  GND ──► GND        │    │
-     │  └─────────────────────┘    │
-     │                             │
-     └─────────────────────────────┘
+                              ┌──────────────┼──────────────┐
+                              │              │              │
+                             5V             5V            GND
+                              │              │              │
+          ┌───────────────────┴──┐    ┌──────┴──────┐       │
+          │    RP2040-Zero       │    │  TB6612FNG  │       │
+          │                      │    │             │       │
+          │ VBUS ◄── 5V          │    │ VCC ◄── 5V  │       │
+          │ GND ◄── GND ─────────────────────── GND ◄──────┘
+          │                      │    │ VM  ◄── 5V  │
+          │                      │    │             │
+          │ GPIO 2 ──────────────────► PWMA        │
+          │ GPIO 3 ──────────────────► PWMB        │
+          │                      │    │             │
+          │ 3V3 ─────────────────────► STBY        │
+          │ 3V3 ─────────────────────► AIN1, BIN1  │
+          │ GND ─────────────────────► AIN2, BIN2  │
+          │                      │    │             │
+          │                      │    │ AO1 ──► M1+ │
+          │                      │    │ AO2 ──► M1- │
+          │                      │    │ BO1 ──► M2+ │
+          │                      │    │ BO2 ──► M2- │
+          │                      │    └──────┬──────┘
+          │                      │           │
+          │                      │    ┌──────┴──────┐
+          │                      │    │   MOTORS    │
+          │                      │    │ 2x FA-130   │
+          │                      │    │ ∅20mm 1.5-3V│
+          │                      │    │ ┌───┐ ┌───┐ │
+          │                      │    │ │ M1│ │ M2│ │
+          │                      │    │ └───┘ └───┘ │
+          │                      │    └─────────────┘
+          │                      │
+          │          ┌───────────────────────────────┐
+          │          │    ST7735 Display              │
+          │          │                                │
+          │ 3V3 ────────► VCC                        │
+          │ GND ────────► GND                        │
+          │ GPIO 6 (SCK) ► SCL                       │
+          │ GPIO 7 (MOSI)► SDA                       │
+          │ GPIO 5 ─────► CS                         │
+          │ GPIO 8 ─────► DC                         │
+          │ GPIO 9 ─────► RES                        │
+          │ GPIO 10 ────► BL                         │
+          │          └───────────────────────────────┘
+          │                      │
+          │  ┌───────────────────┴──────────────┐
+          │  │                                  │
+          │  │  ┌─────────────────────┐  ┌──────┴──────┐
+          │  │  │   Rotary Encoder    │  │ Extra BTN   │
+          │  │  │                     │  │             │
+          │  │  │  A ────► GPIO 15    │  │ S ─► GPIO 16│
+          │  │  │  B ────► GPIO 14    │  │ - ─► GND    │
+          │  │  │  SW ───► GPIO 4     │  └─────────────┘
+          │  │  │  + ────► 3V3        │
+          │  │  │  GND ──► GND        │
+          │  │  └─────────────────────┘
+          │  │                                  │
+          └──┴──────────────────────────────────┘
 
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -99,12 +107,12 @@
                                 POWER SUPPLY
 ═══════════════════════════════════════════════════════════════════════════════
 
- Li-Po 1S (3.7V) ──► LX-LCBST ──► 5V
+ Li-Po 1S (3.7V) ──► LX-LCBST ──► 5V (direct to RP2040 VBUS, TB6612FNG VCC+VM)
                                   │
-                                  ├──► RP2040-Zero (VBUS)
-                                  ├──► TB6612FNG (VCC + VM)
+                                  ├──► RP2040-Zero (VBUS) ──► onboard 3V3 regulator
+                                  ├──► TB6612FNG (VCC + VM)  ◄── direct, not via RP2040
                                   │
- RP2040-Zero 3V3 ─────────────────┴──► ST7735, Encoder, TB6612FNG logic
+ RP2040-Zero 3V3 ─────────────────┴──► ST7735, Encoder, TB6612FNG logic (STBY, AIN1, BIN1)
 
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -113,12 +121,15 @@
 
 1. LX-LCBST — boost converter steps up 3.7V to 5V to power the entire circuit
 
-2. TB6612FNG VM — can be connected to 5V or a separate source up to 13.5V
-   for more powerful motors
+2. TB6612FNG VCC+VM — powered directly from LX-LCBST 5V (not via RP2040)
+   to handle motor current (FA-130 up to ~800mA each)
 
 3. Motor direction — fixed via AIN1/BIN1=HIGH, AIN2/BIN2=LOW
 
-4. ST7735 — powered from 3.3V (from RP2040-Zero onboard regulator)
+4. Motors — 2x FA-130 (∅20mm), nominal 1.5–3V, max ~4.5V
+   PWM limited to 65% via MOTOR_MAX_SPEED in config.h (~3.25V effective at 5V VM)
 
-5. Encoder — with built-in pull-up resistors; if not present,
-   add 10kΩ pull-ups to 3V3
+5. ST7735 — powered from 3.3V (from RP2040-Zero onboard regulator)
+
+6. Encoder — internal pull-ups enabled in firmware (gpio_pull_up),
+   no external resistors needed
