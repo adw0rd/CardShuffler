@@ -2,7 +2,7 @@
 
 Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/1005009151783502.html), [Oz](https://www.ozon.ru/product/shafl-mashinka-dlya-peremeshivaniya-kart-2946931123/), [Oz](https://www.ozon.ru/product/avtomaticheskiy-peremeshivatel-kart-dlya-pokera-elektronnyy-peremeshivatel-2022-chernyy-3070517864/), [Oz](https://www.ozon.ru/product/ustroystvo-dlya-peremeshivaniya-kart-1807983264/)) powered by RP2040-Zero with TFT display (ST7735), rotary encoder (KY-040), and TB6612FNG motor driver.
 
-<img width="200" height="200" alt="cf" src="docs/card-shuffler.png" /> <img width="200" height="200" alt="st7735" src="docs/st7735.png" /> <img width="200" height="200" alt="rp2040" src="docs/rp2040-zero.png" />
+<img width="200" height="200" alt="cf" src="docs/card-shuffler.png" /> <img width="200" height="200" alt="st7735" src="docs/st7735.png" /> <img width="200" height="200" alt="rp2040" src="docs/rp2040-zero.jpg" />
 <img width="200" height="200" alt="ky040" src="docs/ky040.png" /> <img width="200" height="200" alt="tb6612fng" src="docs/tb6612fng.jpg" /> <img width="200" height="200" alt="fa130" src="docs/motor-fa130.jpg" /> <img width="200" height="200" alt="lx-lcbst" src="docs/lx-lcbst.jpg" /> <img width="200" height="200" alt="lipo" src="docs/lipo.jpg" />
 
 ## Features
@@ -32,6 +32,9 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 | Display | ST7735 128x160 | SPI0 (GPIO 5-10) |
 | Encoder | KY-040 | GPIO 14-16 |
 | Motor Driver | TB6612FNG | GPIO 2-3 (PWM) |
+| Motors | 2x FA-130 (∅20mm, 1.5–3V) | TB6612FNG AO1/AO2, BO1/BO2 |
+| Boost Converter | LX-LCBST (3.7V → 5V) | 5V to RP2040 VBUS, TB6612FNG VCC+VM |
+| Battery | 1S Li-Po 3.7V 500mAh+ | LX-LCBST VIN |
 
 ### Pinout (RP2040-Zero)
 
@@ -92,6 +95,8 @@ GP3 ───────────────→ PWMB
 GND ───────────────→ BIN2                   BOUT2 ──→ Motor 2
 3V3 ───────────────→ STBY
 ```
+
+> **Tip:** Li-Po 1S 3.7V batteries can be salvaged from old e-cigarettes and vapes.
 
 ## Building
 
