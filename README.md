@@ -92,7 +92,7 @@ GND ───────────────→ BIN2                   BOUT
 3V3 ───────────────→ STBY
 ```
 
-<img width="400" height="400" alt="fa130" src="https://github.com/adw0rd/CardShuffler/blob/main/docs/motor-fa130.jpg" />
+<img width="200" height="200" alt="fa130" src="docs/motor-fa130.jpg" />
 
 
 ## Building
