@@ -2,11 +2,7 @@
 
 Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/1005009151783502.html), [Oz](https://www.ozon.ru/product/shafl-mashinka-dlya-peremeshivaniya-kart-2946931123/), [Oz](https://www.ozon.ru/product/avtomaticheskiy-peremeshivatel-kart-dlya-pokera-elektronnyy-peremeshivatel-2022-chernyy-3070517864/), [Oz](https://www.ozon.ru/product/ustroystvo-dlya-peremeshivaniya-kart-1807983264/)) powered by RP2040-Zero with TFT display (ST7735), rotary encoder (KY-040), and TB6612FNG motor driver.
 
-<img width="150" height="150" alt="cf" src="docs/card-shuffler.png" />
-<img width="150" height="150" alt="st7735" src="docs/st7735.png" />
-<img width="150" height="150" alt="rp2040" src="docs/rp2040-zero.png" />
-<img width="150" height="150" alt="ky040" src="docs/ky040.png" />
-<img width="150" height="150" alt="tb6612fng" src="docs/tb6612fng.jpg" />
+<img width="150" height="150" alt="cf" src="docs/card-shuffler.png" /> <img width="150" height="150" alt="st7735" src="docs/st7735.png" /> <img width="150" height="150" alt="rp2040" src="docs/rp2040-zero.png" /> <img width="150" height="150" alt="ky040" src="docs/ky040.png" /> <img width="150" height="150" alt="tb6612fng" src="docs/tb6612fng.jpg" />
 
 ## Features
 
