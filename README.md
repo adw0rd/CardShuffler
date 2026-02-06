@@ -36,6 +36,8 @@ Firmware for an automatic card shuffler ([Ali](https://aliexpress.ru/item/100500
 | Boost Converter | LX-LCBST (3.7V → 5V) | 5V to RP2040 VBUS, TB6612FNG VCC+VM |
 | Battery | 1S Li-Po 3.7V 500mAh+ | LX-LCBST VIN |
 
+> **Tip:** Li-Po 1S 3.7V batteries can be salvaged from old e-cigarettes and vapes.
+
 ### Pinout (RP2040-Zero)
 
 ```
@@ -95,8 +97,6 @@ GP3 ───────────────→ PWMB
 GND ───────────────→ BIN2                   BOUT2 ──→ Motor 2
 3V3 ───────────────→ STBY
 ```
-
-> **Tip:** Li-Po 1S 3.7V batteries can be salvaged from old e-cigarettes and vapes.
 
 ## Building
 
