@@ -33,7 +33,7 @@ void motor_init(void) {
 }
 
 void motor_set_speed(motor_id_t motor, uint8_t speed) {
-    if (speed > 100) speed = 100;
+    if (speed > MOTOR_MAX_SPEED) speed = MOTOR_MAX_SPEED;
 
     uint16_t level = (PWM_WRAP * speed) / 100;
     pwm_set_chan_level(slice_num[motor], channel[motor], level);
@@ -55,7 +55,7 @@ void motor_stop_all(void) {
 }
 
 void motor_ramp_to(motor_id_t motor, uint8_t target_speed, uint16_t duration_ms) {
-    if (target_speed > 100) target_speed = 100;
+    if (target_speed > MOTOR_MAX_SPEED) target_speed = MOTOR_MAX_SPEED;
 
     int16_t start = current_speed[motor];
     int16_t diff = (int16_t)target_speed - start;
@@ -76,8 +76,8 @@ void motor_ramp_to(motor_id_t motor, uint8_t target_speed, uint16_t duration_ms)
 }
 
 void motor_ramp_both(uint8_t target1, uint8_t target2, uint16_t duration_ms) {
-    if (target1 > 100) target1 = 100;
-    if (target2 > 100) target2 = 100;
+    if (target1 > MOTOR_MAX_SPEED) target1 = MOTOR_MAX_SPEED;
+    if (target2 > MOTOR_MAX_SPEED) target2 = MOTOR_MAX_SPEED;
 
     int16_t start1 = current_speed[0];
     int16_t start2 = current_speed[1];

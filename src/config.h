@@ -42,6 +42,7 @@
 
 #define MOTOR_PWM_FREQ      25000   // 25kHz - silent operation
 #define MOTOR_RAMP_MS       200     // Soft start/stop duration
+#define MOTOR_MAX_SPEED     65      // % of PWM duty cycle (~3.25V at 5V VM for FA-130)
 
 // =============================================================================
 // Menu Configuration
