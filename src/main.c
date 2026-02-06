@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "pico/bootrom.h"
 #include "config.h"
 #include "display/st7735.h"
 #include "display/graphics.h"
@@ -35,6 +36,11 @@ static void handle_menu_input(encoder_event_t event) {
             menu_set_shuffling(false);
             menu_draw();  // Redraw menu to clear spinner
             st7735_flush();
+            break;
+
+        case ENC_EVENT_LONG_PRESS:
+            // Reboot to bootloader for flashing
+            reset_usb_boot(0, 0);
             break;
 
         default:
